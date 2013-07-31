@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fadvise - File ADVISE: give file advisory information</title>
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#bugs">BUGS</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#version">VERSION</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>fadvise - File ADVISE: give file advisory information</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p>fadvise [options] file [...]</p>
+<pre>
+ Options:
+  -help - brief help message
+  -man - full documentation
+  -sequential
+  -random
+  -willneed
+  -dontneed
+  -noreuse
+  -normal (default)
+  -offset=n
+  -length=n
+  -verbose
+  -noverbose</pre>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="item__2dhelp"><strong>-help</strong></a></strong><br />
+</dt>
+<dd>
+Shows usage information and exits.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dman"><strong>-man</strong></a></strong><br />
+</dt>
+<dd>
+Shows the manual page and exits.
+</dd>
+<p></p>
+<dt><strong><a name="item__2doffset_3dn"><strong>-offset=n</strong></a></strong><br />
+</dt>
+<dd>
+Specifies offset for fadvise.
+Defaults to zero if unspecified.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dlength_3dn"><strong>-length=n</strong></a></strong><br />
+</dt>
+<dd>
+Specifies length for fadvise.
+Defaults to zero if unspecified, i.e. the whole file if offset is also zero.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dverbose"><strong>-verbose</strong></a></strong><br />
+</dt>
+<dd>
+Shows incore page info after fadvise.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dnoverbose"><strong>-noverbose</strong></a></strong><br />
+</dt>
+<dd>
+Doesn't show incore page info after fadvise.
+This is the default.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dsequential"><strong>-sequential</strong></a></strong><br />
+</dt>
+<dd>
+Announces the expectation to access the file sequentially.
+</dd>
+<p></p>
+<dt><strong><a name="item__2drandom"><strong>-random</strong></a></strong><br />
+</dt>
+<dd>
+Announces the expectation to access the file randomly.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dwillneed"><strong>-willneed</strong></a></strong><br />
+</dt>
+<dd>
+Announces the expectation that file content will be needed in the
+near future.
+</dd>
+<p></p>
+<dt><strong><a name="item__2ddontneed"><strong>-dontneed</strong></a></strong><br />
+</dt>
+<dd>
+Announces the expectation that file content won't be needed in the
+near future.
+</dd>
+<dd>
+<p>Under Linux 2.6.9, this is known to cause the file content to be
+evicted from the buffer-cache immediately.</p>
+</dd>
+<dd>
+<p>Note that this option first causes an fsync of the file.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item__2dnoreuse"><strong>-noreuse</strong></a></strong><br />
+</dt>
+<dd>
+Announces the expectation that file content won't be reused in the
+near future.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dnormal"><strong>-normal</strong></a></strong><br />
+</dt>
+<dd>
+Announces the expectation to access the file normally.
+This is the default.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>fadvise</strong> is a command used to give file advisory information to the
+operating system.</p>
+<p>Its ``don't need'' option (fadvise --dontneed) is particularly useful
+to cause the files' pages (blocks) to be evicted from the buffer-cache.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+ $ fadvise --verbose --dontneed foo.rrd
+ page size: 4096
+ foo.rrd: no incore pages.</pre>
+<p>
+</p>
+<hr />
+<h1><a name="bugs">BUGS</a></h1>
+<p><strong>-dontneed</strong> might be the only really useful option.</p>
+<p>In verbose mode, you may get an error from mincore such as ``cannot
+allocate memory'' if the file size is zero.</p>
+<p>Some operating systems have posix_fadvise, but it doesn't work.
+For instance under Linux 2.4, you may see this error:</p>
+<pre>
+ posix_fadvise: Inappropriate ioctl for device</pre>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Dave Plonka &lt;<a href="mailto:plonka@cs.wisc.edu">plonka@cs.wisc.edu</a>&gt;</p>
+<p>Copyright (C) 2007  Dave Plonka.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+<p>
+</p>
+<hr />
+<h1><a name="version">VERSION</a></h1>
+<p>This is fadvise <strong>$Revision: 1.5 $</strong>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>The <strong>fincore</strong> command.</p>
+
+</body>
+
+</html>

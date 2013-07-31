@@ -1,0 +1,29 @@
+fadvise is a command used to give file advisory information to the operating system.
+Its "don't need" option (fadvise --dontneed) is particularly useful to cause the files' pages (blocks) to be evicted from the buffer-cache.
+
+Here is some sample output:
+$ fadvise --verbose --dontneed foo.rrd
+page size: 4096
+foo.rrd: no incore pages.
+And the usage information:
+Usage:
+    fadvise [options] file [...]
+
+     Options:
+      -help - brief help message
+      -man - full documentation
+      -sequential
+      -random
+      -willneed
+      -dontneed
+      -noreuse
+      -normal (default)
+      -offset=n
+      -length=n
+      -verbose
+      -noverbose
+
+The fadvise command was introduced in the paper, "Application Buffer-Cache Management for Performance: Running the World's Largest MRTG", that appears in the proceedings of the LISA 2007 conference in Dallas, November, 2007.
+It is available online here: 
+http://www.usenix.org/events/lisa07/tech/plonka.html
+You may also be interested in the related fincore command.
