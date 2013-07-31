@@ -28,13 +28,13 @@ use Pod::Usage;
 use POSIX; # for sysconf
 
 my %opt;
+my @advice;
 
 # { CONFIGURATION SECTION BEGIN ################################################
 
 # option defaults:
 $opt{h} = 0;
 $opt{m} = 0;
-$opt{a} = '\0'; # --normal
 $opt{o} = 0; # --offset=0
 $opt{l} = 0; # --length=0
 $opt{v} = 0; # --noverbose
@@ -42,31 +42,22 @@ $opt{v} = 0; # --noverbose
 # } CONFIGURATION SECTION END ##################################################
 
 GetOptions('help'       => \$opt{h},
-	   'man'        => \$opt{m},
+           'man'        => \$opt{m},
            'advice=s'   => \$opt{a},
-	   'offset=o'   => \$opt{o},
-	   'length=o'   => \$opt{l},
-	   'verbose!'   => \$opt{v},
-	   'sequential' => sub { $opt{a} = 's' },
-	   'random'     => sub { $opt{a} = 'r' },
-	   'willneed'   => sub { $opt{a} = 'w' },
-	   'dontneed'   => sub { $opt{a} = 'd' },
-	   'noreuse'    => sub { $opt{a} = 'n' },
-	   'normal'     => sub { $opt{a} = '\0' }) or pod2usage(2);
+           'offset=o'   => \$opt{o},
+           'length=o'   => \$opt{l},
+           'verbose!'   => \$opt{v},
+           'sequential' => sub { push(@advice, 's') },
+           'random'     => sub { push(@advice, 'r') },
+           'willneed'   => sub { push(@advice, 'w') },
+           'dontneed'   => sub { push(@advice, 'd') },
+           'noreuse'    => sub { push(@advice, 'n') },
+           'normal'     => sub { push(@advice, '\0') }) or pod2usage(2);
 
 pod2usage(0) if ($opt{h});
 pod2usage(-exitstatus => 0, -verbose => 2) if $opt{m};
 
-pod2usage(2)
-if (('\0' ne $opt{a} and
-     ('s' ne $opt{a} and
-      'r' ne $opt{a} and
-      'w' ne $opt{a} and
-      'd' ne $opt{a} and
-      'n' ne $opt{a})) or
-      $opt{o} < 0 or
-      $opt{l} < 0 or
-      0 == @ARGV);
+pod2usage(2) if ($opt{o} < 0 or $opt{l} < 0 or 0 == @ARGV);
 
 if ($opt{v}) {
    my $pageSize = POSIX::sysconf(&POSIX::_SC_PAGESIZE);
@@ -75,8 +66,10 @@ if ($opt{v}) {
 
 foreach my $ARGV (@ARGV) {
    # FIXME - call fincore before and use Array::Diff after to show changes
-   if (0 != fadvise($ARGV, $opt{o}, $opt{l}, $opt{a})) {
-      exit(1);
+   foreach my $advice (@advice) {
+       if (0 != fadvise($ARGV, $opt{o}, $opt{l}, $advice)) {
+           exit(1);
+       }
    }
    if ($opt{v}) {
       my @values = fincore($ARGV);
@@ -385,7 +378,7 @@ fadvise(char *filename, size_t offset, size_t len, char adviceChar) {
       break;
    case 'd':
       advice = POSIX_FADV_DONTNEED;
-      fsync(fd); /* on Linux 2.6.9 you can only invalidate_mapping_pages if
+      fdatasync(fd); /* on Linux 2.6.9 you can only invalidate_mapping_pages if
                   * those pages aren't dirty, so sync this file to disk first.
                   * (This makes it likely that the advice will be followed,
                   *  and that those pages will actually be flushed from cache.)
